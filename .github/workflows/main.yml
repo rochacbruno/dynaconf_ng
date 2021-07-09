@@ -14,13 +14,37 @@ on:
   workflow_dispatch:
 
 jobs:
-  ci:
+  linter:
     strategy:
       fail-fast: false
       matrix:
         python-version: [3.9]
         poetry-version: [1.1.7]
-        os: [ubuntu-18.04, macos-latest, windows-latest]
+        os: [ubuntu-18.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run image
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+      - name: View poetry version
+        run: poetry --version
+      - name: Install project
+        run: poetry install
+      - name: Run linter
+        run: poetry run flake8 .
+
+  tests_nix:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.9]
+        poetry-version: [1.1.7]
+        os: [ubuntu-18.04, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -39,3 +63,29 @@ jobs:
         run: poetry run flake8 .
       - name: run tests
         run: poetry run py.test -s -vvvv -l --tb=long tests
+
+  tests_win:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.9]
+        poetry-version: [1.1.7]
+        os: [windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run image
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+      - name: View poetry version
+        run: poetry --version
+      - name: Install project
+        run: poetry install
+      - name: Run linter
+        run: poetry run flake8 .
+      - name: run tests
+        run: poetry run py.test tests/
