@@ -21,7 +21,6 @@ watch:                   ## Run tests on file changes
 
 install:                 ## Install dependencies
 	poetry install --no-interaction
-	make setup-pre-commit
 
 setup-pre-commit:        ## Run pre-commit hooks
 	pre-commit install
