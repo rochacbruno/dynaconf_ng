@@ -59,10 +59,8 @@ jobs:
         run: poetry --version
       - name: Install project
         run: poetry install
-      - name: Run linter
-        run: poetry run flake8 .
       - name: run tests
-        run: poetry run py.test -s -vvvv -l --tb=long tests
+        run: poetry run pytest -s -vvvv -l --tb=long tests
 
   tests_win:
     strategy:
@@ -85,7 +83,5 @@ jobs:
         run: poetry --version
       - name: Install project
         run: poetry install
-      - name: Run linter
-        run: poetry run flake8 .
       - name: run tests
-        run: poetry run py.test tests/
+        run: poetry run pytest -s -vvvv -l --tb=long tests
