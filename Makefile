@@ -11,10 +11,10 @@ all:                     ## Run everything
 	clean install run-pre-commit lint test
 
 lint:                    ## Lint with flake
-	flake8 .
+	poetry run flake8 .
 
 test:                    ## Run tests 
-	pytest -x -s -vvvv -l --tb=long tests/
+	poetry run pytest -x -s -vvvv -l --tb=long tests/
 
 watch:                   ## Run tests on file changes
 	ls **/**.py | entr -s "make lint test"
@@ -22,9 +22,14 @@ watch:                   ## Run tests on file changes
 install:                 ## Install dependencies
 	poetry install --no-interaction
 
-setup-pre-commit:        ## Run pre-commit hooks
+setup-pre-commit:        ## Setup pre-commit hooks
 	pre-commit install
 	pre-commit install-hooks
+
+run-pre-commit:          ## Run pre-commit hooks
+	rm -rf .tox/
+	rm -rf build/
+	pre-commit run --files $$(find -regex '.*\.\(py\|yaml\|yml\|md\)') -v
 
 clean:                   ## Clean up python artifacts
 	@find ./ -name '*.pyc' -exec rm -f {} \;
