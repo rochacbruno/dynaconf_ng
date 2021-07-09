@@ -96,62 +96,17 @@ Everything explained on https://dynaconf.com works out of the box, no breaking c
 
 
 ```py
-from dynaconf import Dynaconf, schema
+from dynaconf import Dynaconf
 
-class ServerType(schema.StringType):
-    host: str
-    port: int
+class MySettings(Dynaconf):
+    server: str         # no default value so it is required
+    port: int = 8080    # type validation and default value provided
+    options: List[str] = ["default"]  # Typed defaults
 
-    def read(self, value):
-        """Hipotetically take http://foo.bar:5000 """
-        host, port = value.rpartition(":")
-        self.host = host.strip()
-        self.port = int(port.strip())
+    class Config(Dynaconf.Config):
+        envvar_prefix = "MYAPP_"
 
-    def validate(self, settings, value):
-        if not value.startswith("http"):
-            raise schema.ValidationError("Invalid Server")
+
+
+settings = MySettings()
 ```
-
-```py
-class MySettings(schema.BaseSettings):
-    name: str
-    server: ServerType   # Types are composable
-    port: int
-
-    class Meta:
-        strict = True
-        strict_fields = ['name']  # for when wide strict is False
-        readonly = ["name"]
-
-    def validate_<field_name>(...):
-
-    def read_<field_name>(...):
-
-    def write_<field_name>(...):
-```
-
-then
-
-```py 
-settings = Dynaconf(
-    settings_file="settings.yaml",
-    schema=MySettings
-)
-```
-
-- Loaders will occur normally, but there will be a de-serialization step based on the schema
-- Validation will be performed first using the schema, then fall back to legacy Validators
-- Dynaconf Validators will be deprecated in favor of class-based schema
-- When `strict=False` (the default) the Schema will be used for validation and parsing, but variables out of the schema will still be loaded
-- When `strict=True` only variables defined on the schema will be loaded
-
-## Questions
-
-- Pydantic or purely Python types?
-- Refactor or write from scratch?
-- Keep Box or replace with ChainMap? (how to do that without breaks)
-- YAML must be the preferred format instead of TOML?
-- Make TOML parser for envvars optional?
-
-
