@@ -1,29 +1,33 @@
 SHELL := /bin/bash
-.PHONY: install lint test watch
+.PHONY: help all lint test watch isntall setup-pre-commit clean
 
-help:
-	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
+help:                    ## Show the help.
+	@echo "Usage: make <target>"
+	@echo ""
+	@echo "Targets:"
+	@fgrep "##" Makefile | fgrep -v fgrep
 
-all: clean install run-pre-commit lint test
+all:                     ## Run everything 
+	clean install run-pre-commit lint test
 
-lint:
+lint:                    ## Lint with flake
 	flake8 .
 
-test:
+test:                    ## Run tests 
 	pytest -x -s -vvvv -l --tb=long tests/
 
-watch:
+watch:                   ## Run tests on file changes
 	ls **/**.py | entr -s "make lint test"
 
-install:
+install:                 ## Install dependencies
 	poetry install --no-interaction
 	make setup-pre-commit
 
-setup-pre-commit:
+setup-pre-commit:        ## Run pre-commit hooks
 	pre-commit install
 	pre-commit install-hooks
 
-clean:
+clean:                   ## Clean up python artifacts
 	@find ./ -name '*.pyc' -exec rm -f {} \;
 	@find ./ -name '__pycache__' -exec rm -rf {} \;
 	@find ./ -name 'Thumbs.db' -exec rm -f {} \;
