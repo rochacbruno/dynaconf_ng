@@ -36,6 +36,6 @@ jobs:
       - name: Install project
         run: poetry install
       - name: Run linter
-        run: flake8 .
+        run: poetry run flake8 .
       - name: run tests
-        run: py.test -s -vvvv -l --tb=long tests
+        run: poetry run py.test -s -vvvv -l --tb=long tests
