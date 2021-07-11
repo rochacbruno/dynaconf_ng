@@ -3,12 +3,12 @@ from typing import List, Optional
 import pytest
 from dynaconf import Dynaconf
 
-os.environ["MYAPP_NUMBER"] = "1313"
-os.environ["MYAPP_NAME"] = "overwritten by instance arg"
-os.environ["MYAPP_MONEY"] = "42.1"
-os.environ["MYAPP_ENABLED"] = "1"
-os.environ["MYAPP_colors"] = '["red", "green", "blue", 32]'
-os.environ["MYAPP_never_empty"] = 'has a value'
+os.environ["TEST002_NAME"] = "overwritten by instance arg"
+os.environ["TEST002_NUMBER"] = "1313"
+os.environ["TEST002_MONEY"] = "42.1"
+os.environ["TEST002_ENABLED"] = "1"
+os.environ["TEST002_colors"] = '["red", "green", "blue", 32]'
+os.environ["TEST002_never_empty"] = 'has a value'
 
 
 EXPECTED_FOO = "bar"
@@ -23,7 +23,7 @@ class MySettings(Dynaconf):
     colors: Optional[List[str]] = None
 
     class Config(Dynaconf.Config):
-        env_prefix = "MYAPP_"
+        env_prefix = "TEST002_"
 
 
 settings = MySettings(
@@ -31,8 +31,10 @@ settings = MySettings(
     name="Bruno",       # overrides env vars
 )
 
+# __import__("ipdb").set_trace()
 
 # envvars and types
+
 
 def test_variable_type_casting():
     assert settings.number == 1313

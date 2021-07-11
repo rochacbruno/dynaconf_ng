@@ -8,30 +8,8 @@ SettingsField = Field  # noqa
 """Extendable settings field"""
 
 
-class DynaconfGetError(Exception):
-    """Raised when a get operation fails"""
-
-
-class SettingsType(BaseModel):
-    """A Type for compound settings."""
-
-
-class Dynaconf(BaseSettings):
-    """Settings Management."""
-
-    def __init__(
-        __pydantic_self__,
-        _env_file: Union[Path, str, None] = None,
-        _env_file_encoding: Optional[str] = None,
-        _secrets_dir: Union[Path, str, None] = None,
-        **values: Any
-    ) -> None:
-        super().__init__(
-            _env_file=_env_file,
-            _env_file_encoding=_env_file_encoding,
-            _secrets_dir=_secrets_dir,
-            **values
-        )
+class BaseDynaconf:
+    """Extendable model"""
 
     def _d_get_value(self, key: str, default: Any = None) -> Any:
         """Get a setting value.
@@ -52,6 +30,7 @@ class Dynaconf(BaseSettings):
         - try to get an uppercase version of the key
         - if the final value is a callable it will be called with the
           key + settings instance as arguments.
+
         """
         if "__" in key or "." in key:
             key = key.replace("__", ".")
@@ -84,7 +63,7 @@ class Dynaconf(BaseSettings):
         return self._d_get_value(name, default=AttributeError)
 
     def __getitem__(self, key: str) -> Any:
-        """Get a setting value by its key name.
+        """Get a setting value by its key name (simulate a dictionary).
 
         try to get the get as an attribute as it is
         if an exception is raised then try the get_value lookup.
@@ -97,18 +76,51 @@ class Dynaconf(BaseSettings):
     def get(self, key: str, default: Any = None) -> Any:
         """Get a setting value by its key name.
 
-        try to get the get as an attribute as it is
-        if an exception is raised then try the get_value lookup.
+        Delegate to __getitem__ to simulate a dictionary.
+
+        :param key: The setting key
+        :param default: The default value to return if the setting is not found
+        :return: The setting value
         """
         try:
             return self[key]
         except KeyError:
             return default
 
+
+class SubModel(BaseDynaconf, BaseModel):
+    """A Type for compound settings.
+
+    Represents a Dict under a Dynaconf object.
+    """
+
+
+class Dynaconf(BaseDynaconf, BaseSettings):
+    """Settings Management."""
+
+    def __init__(
+        __pydantic_self__,
+        _env_file: Union[Path, str, None] = None,
+        _env_file_encoding: Optional[str] = None,
+        _secrets_dir: Union[Path, str, None] = None,
+        **values: Any
+    ) -> None:
+        super().__init__(
+            _env_file=_env_file,
+            _env_file_encoding=_env_file_encoding,
+            _secrets_dir=_secrets_dir,
+            **values
+        )
+
     class Config(BaseSettings.Config):
         """Settings Configuration."""
         env_prefix = "DYNACONF_"
-        env_required = True
+        env_file = None
+        env_file_encoding = 'utf-8'
+        secrets_dir = None
+        validate_all = True
         extra = Extra.allow
-        case_sensitive = False
         arbitrary_types_allowed = True
+        case_sensitive = False
+
+    __config__: Config  # type: ignore
