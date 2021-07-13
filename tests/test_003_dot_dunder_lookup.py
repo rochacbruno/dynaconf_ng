@@ -3,7 +3,7 @@ import os
 from dynaconf import Dynaconf, SubModel
 
 
-os.environ["TEST004_SERVER"] = '{"host": "localhost", "port": 8080}'
+os.environ["TEST003_SERVER"] = '{"host": "localhost", "port": 8080}'
 
 
 class ServerType(SubModel):
@@ -15,7 +15,7 @@ class Settings(Dynaconf):
     server: ServerType = ServerType()
 
     class Config(Dynaconf.Config):
-        env_prefix = "TEST004_"
+        env_prefix = "TEST003_"
 
 
 settings = Settings()
